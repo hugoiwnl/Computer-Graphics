@@ -28,7 +28,7 @@ class InterpTacka extends Tacka{
     }
 }
 class Curve{
-    constructor(i0,a0,i1,a1){
+    constructor(i0,a0,a1,i1){
         this.points = [
             new InterpTacka(i0.x, i0.y),
             new ApproxTacka(a0.x, a0.y),
@@ -41,13 +41,23 @@ class Curve{
         this.i1 = this.points[3];
         
         this.color = "#000000";
+        
     }
 
     draw(context){
+        context.beginPath();
+        context.moveTo(this.i0.x,this.i0.y);
+        context.lineTo(this.a0.x,this.a0.y);
+        context.moveTo(this.i1.x,this.i1.y);
+        context.lineTo(this.a1.x,this.a1.y);
+        context.stroke();
+
+        context.strokeStyle=this.color;
+
         this.i0.draw(context);
-        this.i1.draw(context);
         this.a0.draw(context);
         this.a1.draw(context);
+        this.i1.draw(context);
     }
 }
 class Menager{
@@ -59,16 +69,14 @@ class Menager{
     }
     dodajTacku(tacka){
         this.points.push(tacka);
-        //console.log(tacka);
         this.napravi_curve();
-
     }
 
     napravi_curve(){
+        this.curves=[];
         if(this.points.length<4)
             return;
         else{
-            //pushuj new curve prvo pa onda iteriraj
             this.curves.push(
                 new Curve(
                     this.points[0],
@@ -76,6 +84,7 @@ class Menager{
                     this.points[2],
                     this.points[3])
             )
+        
             for(let i=3;i<this.points.length-3;i+=3){
                 this.curves.push(
                     new Curve(
@@ -85,11 +94,13 @@ class Menager{
                         this.points[i+4])
                 )
             }
+            
         }
         this.crtanje();    
     }
     crtanje(){
         for(let c of this.curves){
+            console.log(c);
             c.draw(context);
         }
     }
