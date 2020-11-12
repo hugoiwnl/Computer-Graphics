@@ -1,0 +1,1 @@
+For the transformation display, enter the coordinates in 'v x y z' format in the first textarea, and then click the button to calculate!

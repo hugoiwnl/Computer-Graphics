@@ -1,0 +1,66 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        canvas{
+            width: 100%;
+            height: 100%;
+
+        }
+        #del_button{
+            position: fixed;
+            top: 5%;
+            left:50px;
+            font-size: 10px;
+        }
+        #add_button{
+            position:fixed;
+            top: 10%;
+            left: 55px;
+            font-size: 10px;
+        }
+        #color_pick{
+            position: fixed;
+            width:100px;
+            height: 50px;
+            top: 21%;
+            left: 23px;
+        }
+        #picker{
+            position:fixed;
+            top:15%;
+            left: 15px;
+        }
+    </style>
+</head>
+<body>
+    <script src="bezier.js"></script>
+    <canvas id="draw"></canvas>
+    <button id="del_button">Delete</button>
+    <button id="add_button">Add</button>
+    <h5 id="picker">Click to pick a color: </h3>
+    <input type="color" id="color_pick" value="#ff0000">
+    <script>
+        let canvas=document.getElementById("draw");
+        let context=canvas.getContext("2d");
+        canvas.width=canvas.clientWidth;
+        canvas.height=canvas.clientHeight;
+        let menager=new Menager();
+        let indexTacke=0;
+        let mouse;
+        function clear(){
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        canvas.addEventListener("mousedown",(event)=>{
+            if(indexTacke==0 || indexTacke%3==0)
+                mouse=new InterpTacka(event.offsetX,event.offsetY);
+            else 
+                mouse=new ApproxTacka(event.offsetX,event.offsetY);
+            menager.dodajTacku(mouse);
+            indexTacke++;
+        })
+    </script>
+</body>
+</html>
