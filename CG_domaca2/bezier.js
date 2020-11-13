@@ -13,6 +13,7 @@ class ApproxTacka extends Tacka{
     draw(context){
         context.beginPath();
         context.arc(this.x,this.y+this.radius,this.radius,0,2*Math.PI);
+        //dodajem radius na y da bi se spojili na sredini
         context.fill();
     }
 
@@ -25,6 +26,7 @@ class InterpTacka extends Tacka{
     //crtas kvadrat kada je interpolirana tacka
     draw(context){
         context.fillRect(this.x-this.stranica/2,this.y,this.stranica,this.stranica);
+        //isto oduzimam od x da bi se na sredini spojili
     }
 }
 class Curve{
@@ -88,10 +90,10 @@ class Menager{
             for(let i=3;i<this.points.length-3;i+=3){
                 this.curves.push(
                     new Curve(
+                        this.points[i],
                         this.points[i+1],
                         this.points[i+2],
-                        this.points[i+3],
-                        this.points[i+4])
+                        this.points[i+3])
                 )
             }
             
@@ -100,7 +102,6 @@ class Menager{
     }
     crtanje(){
         for(let c of this.curves){
-            console.log(c);
             c.draw(context);
         }
     }
