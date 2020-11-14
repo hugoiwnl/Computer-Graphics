@@ -42,7 +42,38 @@ class Curve{
         this.a1 = this.points[2];
         this.i1 = this.points[3];
         
-        this.color = "#000000";
+        this.color = "#00FF00";
+        
+    }
+    lerp(a,b,t){
+        return (1-t)*a+t*b;
+    }
+
+    izracunajLerp(tacka1,tacka2,t){
+        return new Tacka(this.lerp(tacka1.x,tacka2.x,t),this.lerp(tacka1.y,tacka2.y,t));
+    }
+    pocetakBezier(t){
+        return this.bezierTacka(this.points,t);
+    }
+
+    bezierTacka(tacke,t){
+        //rekurzivna funkcija za lerp medju tackama i na kraju dobijemo tacku na krivulji
+        let lerp_tacke=[];
+        for(let i=0;i<tacke.length-1;i++){
+            lerp_tacke.push(this.izracunajLerp(tacke[i],tacke[i+1],t));
+        }
+        if(lerp_tacke.length==1) return lerp_tacke[0];
+        return this.bezierTacka(lerp_tacke,t);
+    }
+    drawCurve(razmak){
+        context.beginPath();
+        context.moveTo(this.i0.x,this.i0.y);
+        for(let i=0;i<1;i+=razmak){
+            let point = this.pocetakBezier(i);
+            context.lineTo(point.x,point.y);
+        }
+        context.lineTo(this.i1.x, this.i1.y);
+        context.stroke();
         
     }
 
@@ -55,12 +86,16 @@ class Curve{
         context.stroke();
 
         context.strokeStyle=this.color;
+        this.drawCurve(0.01);
+        context.strokeStyle="#000000";
 
         this.i0.draw(context);
         this.a0.draw(context);
         this.a1.draw(context);
         this.i1.draw(context);
     }
+    
+
 }
 class Menager{
     constructor(){

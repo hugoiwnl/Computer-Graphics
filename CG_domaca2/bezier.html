@@ -38,21 +38,24 @@
 <body>
     <script src="bezier.js"></script>
     <canvas id="draw"></canvas>
-    <button id="del_button">Delete</button>
+    <button id="del_button" >Delete</button>
     <button id="add_button">Add</button>
     <h5 id="picker">Click to pick a color: </h3>
-    <input type="color" id="color_pick" value="#ff0000">
+    <input type="color" id="color_pick" value="#00FF00">
     <script>
+        function clear(){
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        }
         let canvas=document.getElementById("draw");
         let context=canvas.getContext("2d");
+        let color_picker=document.getElementById("color_pick");
+        let delete_button=document.getElementById("del_button");
+        delete_button.addEventListener("click",clear);
         canvas.width=canvas.clientWidth;
         canvas.height=canvas.clientHeight;
         let menager=new Menager();
         let indexTacke=0;
         let mouse;
-        function clear(){
-            context.clearRect(0, 0, canvas.width, canvas.height);
-        }
         canvas.addEventListener("mousedown",(event)=>{
             if(indexTacke==0 || indexTacke%3==0)
                 mouse=new InterpTacka(event.offsetX,event.offsetY);
