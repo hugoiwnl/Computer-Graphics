@@ -65,6 +65,16 @@ class Curve{
         if(lerp_tacke.length==1) return lerp_tacke[0];
         return this.bezierTacka(lerp_tacke,t);
     }
+    brojTacke(tacka){
+        let counter=0;
+        for(let t of this.points){
+            if(tacka.x==t.x && tacka.y==t.y){
+                return counter;
+            }
+            counter++;
+        }
+        return -1;
+    }
     drawCurve(razmak){
         context.beginPath();
         context.moveTo(this.i0.x,this.i0.y);
@@ -108,7 +118,73 @@ class Menager{
         this.points.push(tacka);
         this.napravi_curve();
     }
+    brojTacke(tacka){
+        let counter=0;
+        for(let t of this.points){
+            if(tacka.x==t.x && tacka.y==t.y){
+                return counter;
+            }
+            counter++;
+        }
+        return -1;
+    }
+    brojuKrivulji(tacka){
+        for(let c of this.curves){
+            let br=c.brojTacke(tacka);
+            if(br!=-1) 
+                return br;
+        }
+        return -1;
+    }
+    IsAproximatedPoint(point){
+        let curveIndex = this.brojuKrivulji(point);
+        if( curveIndex == 1 || curveIndex == 2){
+            return true;
+        }
+        
+        return false;
+    }
 
+    //racunam razdalju
+    razdalja(tacka1,tacka2){
+        return Math.sqrt(Math.pow(tacka2.x-tacka1.x,2)+Math.pow(tacka2.y-tacka1.y,2));
+    }
+    //ugao
+    ugao(tacka1,tacka2){
+        return Math.atan2(tacka2.y - tacka1.y, tacka2.x - tacka1.x) * 180 / Math.PI;
+    }
+
+    promeniPolozaj(point){
+        if( !this.IsAproximatedPoint(point) ) {
+            return;
+        }
+        let index = this.brojTacke(point);
+        let uKrivulji = this.brojuKrivulji(point);
+        if( uKrivulji == 1 && index > 2 ){
+            let intTacka=this.points[index-1];
+            let proslaAprox=this.points[index-2];
+            let angle=this.ugao(point,intTacka);
+            let dist=this.razdalja(point,intTacka);
+            let novaPozicija=new Tacka(
+                intTacka.x+dist*Math.cos(angle / 180 * Math.PI),
+                intTacka.y+dist*Math.sin(angle / 180 * Math.PI)
+            );
+            proslaAprox.x=novaPozicija.x;
+            proslaAprox.y=novaPozicija.y;
+        }else if( uKrivulji == 2 && index <this.points.length-2 ){
+            let intTacka=this.points[index+1];
+            let sledecaAprox=this.points[index+2];
+            let angle=this.ugao(point,intTacka);
+            let dist=this.razdalja(point,intTacka);
+            let novaPozicija=new Tacka(
+                intTacka.x+dist*Math.cos(angle / 180 * Math.PI),
+                intTacka.y+dist*Math.sin(angle / 180 * Math.PI)
+            );
+            sledecaAprox.x=novaPozicija.x;
+            sledecaAprox.y=novaPozicija.y;
+        }
+    }
+    
     napravi_curve(){
         this.curves=[];
         if(this.points.length<4)
@@ -133,12 +209,22 @@ class Menager{
             }
             
         }
-        this.crtanje();    
+        //moram da promenim poziciju tacaka za zveznost stopnje 1
+        for(let c of this.curves){
+            for(let p of c.points){
+                this.promeniPolozaj(p); 
+            }
+        } 
+        this.crtanje();   
     }
     crtanje(){
         for(let c of this.curves){
+            let boja=document.getElementById("color_pick").value;
+            c.color=boja;
             c.draw(context);
         }
     }
+
+
 }
 //promeni da na svaka 3 umesto svaka 4 bude crtanje, interp i approx nisu izracunane dobro inace
