@@ -5,7 +5,7 @@ class Tacka{
     }
 }
 class ApproxTacka extends Tacka{
-    constructor(x=0,y=0,radius=4){
+    constructor(x=0,y=0,radius=5){
         super(x,y);
         this.radius=radius;
     }
@@ -16,10 +16,15 @@ class ApproxTacka extends Tacka{
         //dodajem radius na y da bi se spojili na sredini
         context.fill();
     }
+    Kliknuta(mouse){
+        let racun=Math.sqrt(Math.pow(mouse.x-this.x,2)+Math.pow(mouse.y-this.y,2));
+        if(racun<this.radius*2) return true;
+        return false;
+    }
 
 }
 class InterpTacka extends Tacka{
-    constructor(x=0,y=0,stranica=9){
+    constructor(x=0,y=0,stranica=10){
         super(x,y);
         this.stranica=stranica;
     }
@@ -27,6 +32,12 @@ class InterpTacka extends Tacka{
     draw(context){
         context.fillRect(this.x-this.stranica/2,this.y,this.stranica,this.stranica);
         //isto oduzimam od x da bi se na sredini spojili
+    }
+    Kliknuta(mouse){
+        return  mouse.x > this.x - this.stranica && 
+                mouse.y > this.y - this.stranica && 
+                mouse.x < this.x + this.stranica && 
+                mouse.y < this.y + this.stranica;
     }
 }
 class Curve{
@@ -112,7 +123,8 @@ class Menager{
         this.points = [];
         this.curves=[];
         this.color = "#000000";
-
+        this.selectedTacka=null;
+        this.selected=false;
     }
     dodajTacku(tacka){
         this.points.push(tacka);
@@ -136,7 +148,39 @@ class Menager{
         }
         return -1;
     }
-    IsAproximatedPoint(point){
+    pomeriTacku(tacka,pozicija){
+        if( this.jelAproximirana(tacka) ){
+            this.promeniPolozaj(tacka);
+        } else {
+            let index = this.brojTacke(tacka);
+            
+            if( index > 0){
+                this.points[index-1].x += pozicija.x - tacka.x;
+                this.points[index-1].y += pozicija.y - tacka.y;
+            }
+            if( index < this.points.length-1 ){
+                this.points[index+1].x += pozicija.x - tacka.x;
+                this.points[index+1].y += pozicija.y - tacka.y;
+            }
+        }
+        
+        tacka.x = pozicija.x;
+        tacka.y = pozicija.y;
+        this.napravi_curve();
+    }
+
+    kliknutaTacka(mouse){
+        for(let curve of this.curves){
+            for(let point of curve.points){
+                if(point.Kliknuta(mouse)){
+                    this.selectedTacka= this.points.find( (checkedPoint) => checkedPoint.x == point.x && checkedPoint.y == point.y);
+                    this.selected=true;
+                    return true;
+                }
+            }
+        }
+    }
+    jelAproximirana(point){
         let curveIndex = this.brojuKrivulji(point);
         if( curveIndex == 1 || curveIndex == 2){
             return true;
@@ -155,7 +199,7 @@ class Menager{
     }
 
     promeniPolozaj(point){
-        if( !this.IsAproximatedPoint(point) ) {
+        if( !this.jelAproximirana(point) ) {
             return;
         }
         let index = this.brojTacke(point);
@@ -215,7 +259,7 @@ class Menager{
                 this.promeniPolozaj(p); 
             }
         } 
-        this.crtanje();   
+           
     }
     crtanje(){
         for(let c of this.curves){

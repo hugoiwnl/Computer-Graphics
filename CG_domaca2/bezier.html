@@ -33,6 +33,16 @@
             top:15%;
             left: 15px;
         }
+        #selection {
+            position: absolute;
+            left: 25px;
+            top: 35%;
+            font-size: 1.2em;
+        }
+
+        #curve_pick {
+            width: 90px;
+        }
     </style>
 </head>
 <body>
@@ -42,28 +52,58 @@
     <button id="add_button">Add</button>
     <h5 id="picker">Click to pick a color: </h3>
     <input type="color" id="color_pick" value="#00FF00">
+    <div id="selection">
+        <select id="curve_pick"></select>
+    </div>
     <script>
         function clear(){
             context.clearRect(0, 0, canvas.width, canvas.height);
         }
+        function crtaj(){
+            clear();
+            menager.crtanje();
+        }
+        
         let canvas=document.getElementById("draw");
         let context=canvas.getContext("2d");
         let color_picker=document.getElementById("color_pick");
         let delete_button=document.getElementById("del_button");
-        delete_button.addEventListener("click",clear);
+        let drag=false;
+        
         canvas.width=canvas.clientWidth;
         canvas.height=canvas.clientHeight;
         let menager=new Menager();
         let indexTacke=0;
-        let mouse;
+        function klinkutaKrivulja(mouse){
+            if(menager.kliknutaTacka(mouse)){
+                return true;
+            }
+        }
+        delete_button.onclick = () => {
+            clear();
+        }
         canvas.addEventListener("mousedown",(event)=>{
+            let mouse = new Tacka(event.offsetX, event.offsetY);
+            drag=true;
+            if(klinkutaKrivulja(mouse)) return;
             if(indexTacke==0 || indexTacke%3==0)
                 mouse=new InterpTacka(event.offsetX,event.offsetY);
             else 
                 mouse=new ApproxTacka(event.offsetX,event.offsetY);
             indexTacke++;
             menager.dodajTacku(mouse);
-            
+            crtaj();
+        })
+        
+        canvas.addEventListener("mouseup",(event)=>{
+            drag=false;
+            menager.selectedTacka=null;
+        })
+        canvas.addEventListener("mousemove",(event)=>{
+            if(drag && menager.selected){
+                menager.pomeriTacku(menager.selectedTacka,new Tacka(event.offsetX, event.offsetY));
+                crtaj();
+            }
         })
     </script>
 </body>
