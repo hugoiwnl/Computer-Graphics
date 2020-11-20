@@ -41,6 +41,7 @@ class InterpTacka extends Tacka{
     }
 }
 class Curve{
+    static redniBroj=1;
     constructor(i0,a0,a1,i1){
         this.points = [
             new InterpTacka(i0.x, i0.y),
@@ -54,10 +55,15 @@ class Curve{
         this.i1 = this.points[3];
         
         this.color = "#00FF00";
+
+        
         
     }
     lerp(a,b,t){
         return (1-t)*a+t*b;
+    }
+    toString() {
+        return "Curve number: " + this.friendlyId;
     }
 
     izracunajLerp(tacka1,tacka2,t){
@@ -119,12 +125,23 @@ class Curve{
 
 }
 class Menager{
+    static number=1;
     constructor(){
         this.points = [];
         this.curves=[];
         this.color = "#000000";
         this.selectedTacka=null;
         this.selected=false;
+
+        this.friendlyId = Menager.number++;
+        const selection = document.getElementById("splines");
+        const spline = document.createElement("option");
+        spline.value = this.friendlyId;
+        spline.innerHTML = this;
+        selection.appendChild(spline);
+    }
+    toString() {
+        return "Krivulja " + this.friendlyId;
     }
     dodajTacku(tacka){
         this.points.push(tacka);
@@ -228,6 +245,7 @@ class Menager{
             sledecaAprox.y=novaPozicija.y;
         }
     }
+    
     
     napravi_curve(){
         this.curves=[];

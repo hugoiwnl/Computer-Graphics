@@ -53,58 +53,103 @@
     <h5 id="picker">Click to pick a color: </h3>
     <input type="color" id="color_pick" value="#00FF00">
     <div id="selection">
-        <select id="curve_pick"></select>
+        <select id="splines"></select>
     </div>
     <script>
-        function clear(){
-            context.clearRect(0, 0, canvas.width, canvas.height);
-        }
-        function crtaj(){
-            clear();
-            menager.crtanje();
-        }
+        
         
         let canvas=document.getElementById("draw");
         let context=canvas.getContext("2d");
         let color_picker=document.getElementById("color_pick");
         let delete_button=document.getElementById("del_button");
+        let add_button=document.getElementById("add_button");
         let drag=false;
         
         canvas.width=canvas.clientWidth;
         canvas.height=canvas.clientHeight;
-        let menager=new Menager();
+        
         let indexTacke=0;
+        let aktivniMenager={};
+        let sviMenageri=[];
+        let dodajMenagera=()=>{
+            aktivniMenager=new Menager();
+            
+            sviMenageri.push(aktivniMenager);
+
+        }
         function klinkutaKrivulja(mouse){
-            if(menager.kliknutaTacka(mouse)){
+            if(aktivniMenager.kliknutaTacka(mouse)){
                 return true;
             }
         }
         delete_button.onclick = () => {
             clear();
         }
+        function clear(){
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        function crtaj(){
+            clear();
+            sviMenageri.forEach( aktivniMenager => aktivniMenager.crtanje());
+        }
+        function nadjiSelectedCurve(value){
+            for(let men of sviMenageri){
+                if(men){
+                    if(men.friendlyId==value){
+                        return men;
+                    }
+                }
+            }
+            return -1;
+        }
+        dodajMenagera();
+
         canvas.addEventListener("mousedown",(event)=>{
             let mouse = new Tacka(event.offsetX, event.offsetY);
             drag=true;
-            if(klinkutaKrivulja(mouse)) return;
-            if(indexTacke==0 || indexTacke%3==0)
-                mouse=new InterpTacka(event.offsetX,event.offsetY);
-            else 
-                mouse=new ApproxTacka(event.offsetX,event.offsetY);
-            indexTacke++;
-            menager.dodajTacku(mouse);
+            // ako klikne na tacku ne dodaj novu
+            if(klinkutaKrivulja(mouse)) 
+                return;
+            mouse=new Tacka(event.offsetX,event.offsetY);
+            aktivniMenager.dodajTacku(mouse);
             crtaj();
         })
         
         canvas.addEventListener("mouseup",(event)=>{
             drag=false;
-            menager.selectedTacka=null;
+            aktivniMenager.selectedTacka=null;
         })
         canvas.addEventListener("mousemove",(event)=>{
-            if(drag && menager.selected){
-                menager.pomeriTacku(menager.selectedTacka,new Tacka(event.offsetX, event.offsetY));
+            if(drag && aktivniMenager.selected){
+                aktivniMenager.pomeriTacku(aktivniMenager.selectedTacka,new Tacka(event.offsetX, event.offsetY));
                 crtaj();
             }
         })
+        add_button.onclick = () => {
+            dodajMenagera();
+            document.getElementById("splines").value="";
+        }
+        document.getElementById("splines").onchange = (e) => {
+            const spline = nadjiSelectedCurve(parseInt(document.getElementById("splines").value));
+            if(spline!=-1){
+                aktivniMenager=spline;
+            }
+            
+        }
+        delete_button.onclick=()=>{
+            const options = document.getElementById("splines").options;
+            for(let i = 0; i < options.length; i++){
+                if(parseInt(options[i].value)==aktivniMenager.friendlyId){
+                    options.remove(i);
+                    break;
+                }
+            }
+            document.getElementById("splines").value = "";
+            let ind=aktivniMenager.friendlyId-1;
+            delete sviMenageri[ind];
+            crtaj();
+        }
+
     </script>
 </body>
 </html>
