@@ -246,7 +246,6 @@ class Menager{
         }
     }
     
-    
     napravi_curve(){
         this.curves=[];
         if(this.points.length<4)
