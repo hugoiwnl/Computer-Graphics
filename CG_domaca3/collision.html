@@ -1,0 +1,60 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collision</title>
+    <style>
+        #draw{
+            border: solid 3px black;
+        }
+        h3{
+            position:absolute;
+            left:50%;
+            top: 45%;
+
+        }
+        #ballnum{
+            position:absolute;
+            left: 50%;
+            top: 50%;
+        }
+    </style>
+</head>
+<body>
+    <script src="collision.js"></script>
+    <canvas id="draw" width="900" height="900" style="border:3px solid #000000;"></canvas>
+    <h3>Enter the number of balls bouncing:</h3>
+    <input type="text" id="ballnum" value="50">
+    <script>
+        let canvas=document.getElementById("draw");
+        let context=canvas.getContext("2d");
+        let ballnum=document.getElementById("ballnum");
+        function run(){
+            context.fillStyle="white";
+            context.fillRect(0,0,canvas.width,canvas.height);
+            m.render();
+        }
+        let m=new Menager();
+        window.onload=()=>{
+            ballnum.oninput=(e)=>{
+                m.lopte=[];
+                for(let i=0;i<ballnum.value;i++){
+                    m.lopte.push(new Ball(Math.random()*canvas.clientWidth,Math.random()*canvas.clientHeight));
+                }
+            }
+            ballnum.value = 50;
+            for(let i=0;i<50;i++){
+                    m.lopte.push(new Ball(Math.random()*canvas.clientWidth,Math.random()*canvas.clientHeight));
+            }
+            setInterval(run,20);
+        }
+        
+        /*for(let i=0;i<50;i++){
+            m.lopte.push(new Ball(Math.random()*canvas.clientWidth,Math.random()*canvas.clientHeight));
+        }*/
+        
+        
+        
+    </script>
+</body>
+</html>
