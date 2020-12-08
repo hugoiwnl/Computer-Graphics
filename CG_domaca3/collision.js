@@ -1,10 +1,10 @@
 class Ball{
-    constructor(x=context.canvas.width/2,y=context.canvas.height/2,radius=12){
+    constructor(x=context.canvas.width/2,y=context.canvas.height/2,radius=10){
         this.x=x;
         this.y=y;
         this.radius=radius;
-        this.speedX=Math.random()*(3+7)-3;
-        this.speedY=Math.random()*(3+7)-3;
+        this.speedX=Math.random()*(3+5)-3;
+        this.speedY=Math.random()*(3+5)-3;
         if(Math.floor(Math.random()*2) == 0){
             this.speedX*=-1;
         }
@@ -44,9 +44,13 @@ class Rectangle{
         this.width=width;
         this.height=height;
     }
-
+    //da li kvadrat sadrzi loptu
     contains(ball){
-        return(ball.x+ball.radius/2>=this.x && ball.x+ball.radius/2<=this.x+this.width && ball.y+ball.radius/2>=this.y && ball.y+ball.radius<=this.y+this.height);
+        return(ball.x+ball.radius/2>=this.x && ball.x-ball.radius/2<=this.x+this.width && ball.y+ball.radius/2>=this.y && ball.y-ball.radius<=this.y+this.height);
+    }
+    // da li su 2 rect-a u collisionu
+    intersect(rect){
+        return !(rect.y>this.y+this.height || rect.y+rect.height<this.y || rect.x>this.x+this.width || rect.x+rect.width<this.x);
     }
 
 }
@@ -55,6 +59,7 @@ class QuadTree{
         this.bound=bound;
         this.maxballs=4;
         this.balls=[];
+        //divided boolean menja this.northwest check na wikipedia
         this.divided=false;
     }
     insert(ball){
@@ -94,15 +99,37 @@ class QuadTree{
     }
 
     draw(){
-        context.beginPath();
-        context.rect(this.bound.x,this.bound.y,this.bound.width,this.bound.height);
-        context.stroke();
+        
         if(this.divided){
             this.northwest.draw();
             this.northeast.draw();
             this.southwest.draw();
             this.southeast.draw();
         }
+        context.beginPath();
+        context.rect(this.bound.x,this.bound.y,this.bound.width,this.bound.height);
+        context.stroke();
+    }
+    //nije provereno!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    queryRange(range){
+        let pointsInRange=[];
+        if(!this.bound.intersect(range)){
+            return pointsInRange;
+        }
+        for(let lopta of this.balls){
+            if(range.contains(lopta)){
+                pointsInRange.push(lopta);
+            }
+        }
+        if(!this.divided){
+            return pointsInRange;
+        }
+        Array.prototype.push.apply(pointsInRange,this.northwest.queryRange(range));
+        Array.prototype.push.apply(pointsInRange,this.norteast.queryRange(range));
+        Array.prototype.push.apply(pointsInRange,this.southhwest.queryRange(range));
+        Array.prototype.push.apply(pointsInRange,this.southeast.queryRange(range));
+
+        return pointsInRange;
     }
 
 }
@@ -116,8 +143,9 @@ class Menager{
             quad.insert(loptica);
             loptica.update();
             loptica.draw(context);
-            quad.draw();
         }
+        quad.draw();
+        
     }
 }
 
