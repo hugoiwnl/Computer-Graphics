@@ -52,6 +52,13 @@ class Rectangle{
     intersect(rect){
         return !(rect.y>this.y+this.height || rect.y+rect.height<this.y || rect.x>this.x+this.width || rect.x+rect.width<this.x);
     }
+    //koristim za proveru query-a
+    draw(){
+        context.beginPath();
+        context.strokeStyle = "#FF0000";
+        context.rect(this.x,this.y,this.width,this.height);
+        context.stroke();
+    }
 
 }
 class QuadTree{
@@ -99,7 +106,6 @@ class QuadTree{
     }
 
     draw(){
-        
         if(this.divided){
             this.northwest.draw();
             this.northeast.draw();
@@ -110,7 +116,7 @@ class QuadTree{
         context.rect(this.bound.x,this.bound.y,this.bound.width,this.bound.height);
         context.stroke();
     }
-    //nije provereno!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //provereno je
     queryRange(range){
         let pointsInRange=[];
         if(!this.bound.intersect(range)){
@@ -125,8 +131,8 @@ class QuadTree{
             return pointsInRange;
         }
         Array.prototype.push.apply(pointsInRange,this.northwest.queryRange(range));
-        Array.prototype.push.apply(pointsInRange,this.norteast.queryRange(range));
-        Array.prototype.push.apply(pointsInRange,this.southhwest.queryRange(range));
+        Array.prototype.push.apply(pointsInRange,this.northeast.queryRange(range));
+        Array.prototype.push.apply(pointsInRange,this.southwest.queryRange(range));
         Array.prototype.push.apply(pointsInRange,this.southeast.queryRange(range));
 
         return pointsInRange;
@@ -145,7 +151,6 @@ class Menager{
             loptica.draw(context);
         }
         quad.draw();
-        
     }
 }
 
