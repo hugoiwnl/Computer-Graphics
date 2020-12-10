@@ -40,6 +40,8 @@ class Ball{
         }
         context.arc(this.x,this.y,this.radius,0,2*Math.PI);
         context.stroke();
+        context.strokeStyle = "#000000";
+
         context.closePath();
     }
 
@@ -48,6 +50,10 @@ class Ball{
         let drug=(ball.y-this.y);
         let d=Math.sqrt(Math.pow(prv,2)+Math.pow(drug,2));
         return d<=this.r*2;
+    }
+
+    intersects(circle) {
+        return (this.x - circle.x) * (this.x - circle.x) + (this.y - circle.y) * (this.y - circle.y) <= 4 * (circle.radius * circle.radius);
     }
 }
 class Circle{
@@ -201,16 +207,29 @@ class Menager{
             loptica.draw(context);
         }
         quad.draw();
+        //dobro je, al ostaju crvene
+        let provereneLopte=[];
         for(let lopta of this.lopte){
-            let range=new Circle(lopta.x,lopta.y,lopta.radius*2);
-            let lopteuRangeu=quad.queryRange(range);
-            for(let drugaLopta of lopteuRangeu){
-                if(lopta != drugaLopta && lopta.intersect(drugaLopta)){
-                    lopta.collision=true;
-                    drugaLopta.collision=false;
+            if(!provereneLopte.includes(lopta)){
+                let range=new Circle(lopta.x,lopta.y,lopta.radius*4);
+                let lopteuRangeu=quad.queryRange(range);
+                if(lopteuRangeu.length>1){
+                    for(let drugaLopta of lopteuRangeu){
+                        if(lopta != drugaLopta ){
+                            lopta.collision=true;
+                            drugaLopta.collision=true;
+                            provereneLopte.push(drugaLopta);
+                        }
+                    }
+                }else{
+                    lopta.collision=false;
                 }
+
             }
+            provereneLopte.push(lopta);
+            
         }
+        
     }
 }
-//colision, dugme za menjanje radiusa
+//dugme za menjanje radiusa
