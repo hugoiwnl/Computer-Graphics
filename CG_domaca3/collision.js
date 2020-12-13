@@ -44,17 +44,6 @@ class Ball{
 
         context.closePath();
     }
-
-    intersect(ball){
-        let prv=(ball.x-this.x);
-        let drug=(ball.y-this.y);
-        let d=Math.sqrt(Math.pow(prv,2)+Math.pow(drug,2));
-        return d<=this.r*2;
-    }
-
-    intersects(circle) {
-        return (this.x - circle.x) * (this.x - circle.x) + (this.y - circle.y) * (this.y - circle.y) <= 4 * (circle.radius * circle.radius);
-    }
 }
 class Circle{
     constructor(x,y,r){
@@ -63,12 +52,13 @@ class Circle{
         this.r=r;
     }
     //nije dobar contains
-    contains(ball){
-        let prv=(ball.x-this.x);
-        let drug=(ball.y-this.y);
-        let d=Math.sqrt(Math.pow(prv,2)+Math.pow(drug,2));
-        return this.r>d+ball.radius;
+    contains2(tacka){
+        let prv=(tacka.x-this.x);
+        let drug=(tacka.y-this.y);
+        let d=Math.pow(prv,2)+Math.pow(drug,2);
+        return Math.sqrt(d)<=this.r;
     }
+    //koristim da proverim range
     draw(){
         context.beginPath();
         context.strokeStyle="#FF0000";
@@ -138,14 +128,11 @@ class QuadTree{
     }
 
     subdivide(){
-        let nw=new Rectangle(this.bound.x,this.bound.y,this.bound.width/2,this.bound.height/2);
-        this.northwest=new QuadTree(nw);
-        let ne=new Rectangle(this.bound.x+this.bound.width/2,this.bound.y,this.bound.width/2,this.bound.height/2);
-        this.northeast=new QuadTree(ne);
-        let sw=new Rectangle(this.bound.x,this.bound.y+this.bound.height/2,this.bound.width/2,this.bound.height/2);
-        this.southwest=new QuadTree(sw);
-        let se=new Rectangle(this.bound.x+this.bound.width/2,this.bound.y+this.bound.height/2,this.bound.width/2,this.bound.height/2);
-        this.southeast=new QuadTree(se);
+        this.northwest=new QuadTree(new Rectangle(this.bound.x,this.bound.y,this.bound.width/2,this.bound.height/2));
+        this.northeast=new QuadTree(new Rectangle(this.bound.x+this.bound.width/2,this.bound.y,this.bound.width/2,this.bound.height/2));
+        this.southwest=new QuadTree(new Rectangle(this.bound.x,this.bound.y+this.bound.height/2,this.bound.width/2,this.bound.height/2));
+        this.southeast=new QuadTree(new Rectangle(this.bound.x+this.bound.width/2,this.bound.y+this.bound.height/2,this.bound.width/2,this.bound.height/2));
+        //posle deljenja na podsektore raspodelim lopte od roota, jer moraju sve da budu u leaves
         for(let lopta of this.balls){
             if(this.northwest.bound.contains(lopta)){
                 this.northwest.insert(lopta);
@@ -179,7 +166,7 @@ class QuadTree{
             return pointsInRange;
         }
         for(let lopta of this.balls){
-            if(range.contains(lopta)){
+            if(range.contains2(lopta)){
                 pointsInRange.push(lopta);
             }
         }
@@ -199,19 +186,21 @@ class Menager{
     constructor(){
         this.lopte=[];
     }
-    render(){
+    render(to_draw){
         let quad=new QuadTree(new Rectangle(0,0,900,900));
         for(let loptica of this.lopte){
             quad.insert(loptica);
             loptica.update();
             loptica.draw(context);
         }
-        quad.draw();
-        //dobro je, al ostaju crvene
+        if(to_draw){
+            quad.draw();
+        }
         let provereneLopte=[];
         for(let lopta of this.lopte){
             if(!provereneLopte.includes(lopta)){
-                let range=new Circle(lopta.x,lopta.y,lopta.radius*4);
+                //pravim range oko lopte sa 2*radiusom, i ako je neka druga lopta unutra onda ima collision (proveravam da li je vec iteratirana i da li gledamo istu)
+                let range=new Circle(lopta.x,lopta.y,lopta.radius*2);
                 let lopteuRangeu=quad.queryRange(range);
                 if(lopteuRangeu.length>1){
                     for(let drugaLopta of lopteuRangeu){
@@ -226,10 +215,11 @@ class Menager{
                 }
 
             }
+            //pushuj u proverene
             provereneLopte.push(lopta);
             
         }
         
     }
 }
-//dugme za menjanje radiusa
+

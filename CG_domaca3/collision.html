@@ -23,6 +23,21 @@
             left:70%;
             top: 55%;
         }
+        h5{
+            position:absolute;
+            left:70%;
+            top: 60%;
+        }
+        #drawquad{
+            position:absolute;
+            left: 70%;
+            top: 65%;
+        }
+        #drawlabel{
+            position:absolute;
+            left: 72%;
+            top: 65%;
+        }
     </style>
 </head>
 <body>
@@ -31,14 +46,25 @@
     <h3>Enter the number of balls bouncing:</h3>
     <input type="text" id="ballnum" value="50">
     <h4>You can also add balls by clicking anywhere on the canvas</h4>
+    <input type="checkbox" id="drawquad" onclick="check()">
+    <label  id="drawlabel">Check to draw the quadtree</label>
     <script>
         let canvas=document.getElementById("draw");
         let context=canvas.getContext("2d");
         let ballnum=document.getElementById("ballnum");
+        let quaddraw=document.getElementById("drawquad");
+        let to_draw=false;
         function run(){
             context.fillStyle="white";
             context.fillRect(0,0,canvas.width,canvas.height);
-            m.render();
+            m.render(to_draw);
+        }
+        function check(){
+            if(document.getElementById("drawquad").checked){
+                to_draw=true;
+            }else{
+                to_draw=false;
+            }
         }
         let m=new Menager();
         window.onload=()=>{
@@ -48,24 +74,17 @@
                     m.lopte.push(new Ball(Math.random()*canvas.clientWidth,Math.random()*canvas.clientHeight));
                 }
             }
-
             canvas.onmousedown = (e) =>{
                 m.lopte.push(new Ball(e.clientX,e.clientY));
                 let prosli=Number(ballnum.value);
                 ballnum.value=prosli+1;
             }
-
             ballnum.value = 50;
             for(let i=0;i<50;i++){
                     m.lopte.push(new Ball(Math.random()*canvas.clientWidth,Math.random()*canvas.clientHeight));
             }
             setInterval(run,20);
-        }
-        
-        
-        
-        
-        
+        }  
     </script>
 </body>
 </html>
